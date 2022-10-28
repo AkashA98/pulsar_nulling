@@ -19,4 +19,4 @@ nf = nulls(on, off, ncomp=2, model='exp_tail', nwalkers=32, burnin=200, nsteps=5
 nf.run_mcmc(corr=True)
 ```
 If the user wants to take into account the finite correlation length of the chain in order to get independent samples, then they can set the ```corr``` flag to True. All the results are available as class attributes. For example, the best fit values can be obtained by ```nf.fit_val``` and the errors can be obtained by ```nf.fit_err```. The ordering or parameters will always be 
-## [[means], [standard deviations], [tau(optional)], [weights]]
+### [[means], [standard deviations], [tau(optional)], [weights]]
