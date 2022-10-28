@@ -326,7 +326,7 @@ class nulls:
             # print(bounds)
 
             on_fit = init_on_comp_params
-            print(on_fit)
+            # print(on_fit)
             on_conv = np.ones((len(init_on_comp_params), len(init_on_comp_params))) * 50
             max_tries = 5
             curr_try = 0
