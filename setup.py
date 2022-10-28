@@ -18,7 +18,7 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 # Fields marked as "Optional" may be commented out.
 
 setup(
-    name="pulsar_nulling",
+    name="nulling",
 
     version="0.1", 
     
@@ -30,7 +30,8 @@ setup(
     author="Akash Anumarlapudi", 
 
     author_email="aakash@uwm.edu",
-    
+  
+    package_dir={"": "src"},
     
     packages=find_packages(where="src"),
    
