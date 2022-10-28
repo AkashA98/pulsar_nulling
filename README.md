@@ -4,7 +4,8 @@ A mixture model for analyzing nulling in pulsars, improved on [Kaplan+2018](http
 
 ## It can be installed via pip:
 
-```git clone git@github.com:AkashA98/pulsar_nulling.git
+```
+git clone git@github.com:AkashA98/pulsar_nulling.git
 cd pulsar_nulling/
 pip install -e .
 ```
