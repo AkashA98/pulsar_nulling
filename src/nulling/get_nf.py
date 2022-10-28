@@ -150,7 +150,7 @@ class nulls:
     """
 
     def __init__(
-        self, on, off, ncomp, nwalkers=32, model="gauss", burnin=200, nsteps=5000
+        self, on, off, ncomp=2, model="gauss", nwalkers=32, burnin=200, nsteps=5000
     ):
 
         # Get rid of zapped single pulses
@@ -603,6 +603,9 @@ class nulls:
             self.samples = samples[mask]
         else:
             self.samples = samples
+
+        self.fit_val = np.nanmedian(samples, 0)
+        self.fit_err = np.nanstd(samples, 0)
 
         # Estimate AIC and BIC values
         self.AIC()
