@@ -1,7 +1,7 @@
 import numpy as np
 from astropy.table import Table
 from tqdm import tqdm
-from gen_nf import gauss, gauss_mix, exp_mod_gauss
+from nulling.get_nf import gauss, gauss_mix, exp_mod_gauss
 from sklearn.neighbors import KernelDensity
 from scipy.optimize import curve_fit
 from emcee import EnsembleSampler

@@ -1,0 +1,9 @@
+Metadata-Version: 2.1
+Name: nulling
+Version: 0.1
+Summary: Pulsar Nulling using Mixture models
+Home-page: https://github.com/AkashA98/pulsar_nulling
+Author: Akash Anumarlapudi
+Author-email: aakash@uwm.edu
+Requires-Python: >=3.8
+License-File: LICENSE
