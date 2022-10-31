@@ -4,7 +4,7 @@ A mixture model for analyzing nulling in pulsars, improved on [Kaplan+2018](http
 
 ## It can be installed in the standard way as 
 ```
-python ./setup.pi install
+python ./setup.py install
 ```
 
 ## It can be installed via pip:
