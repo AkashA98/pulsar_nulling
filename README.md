@@ -2,17 +2,16 @@
 
 A mixture model for analyzing nulling in pulsars, improved on [Kaplan+2018](https://github.com/dlakaplan/nulling-pulsars). In addition to the standard Gaussian mixture implemented by [Kaplan+2018](https://github.com/dlakaplan/nulling-pulsars), this extends the analysis to the cases where the distribution is more accurately described by an [exponentially modified Gaussian](https://en.wikipedia.org/wiki/Exponentially_modified_Gaussian_distribution). This also allows to study the correlations in nulling, particularly looking for periodicities in the nulling patterns. Can also be used to study basic drifitng phenonmenon.
 
-## It can be installed in the standard way as 
-```
-python ./setup.py install
-```
-
 ## It can be installed via pip:
 
 ```
 git clone git@github.com:AkashA98/pulsar_nulling.git
 cd pulsar_nulling/
 pip install .
+```
+#### Or in the standard way as 
+```
+python ./setup.py install
 ```
 
 ## Example of the code usage:
