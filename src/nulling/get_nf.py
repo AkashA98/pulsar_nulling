@@ -115,6 +115,93 @@ def fit_func(x, *params):
         return off_comp + on_comp
 
 
+def plot_corner_and_hist(off, on, n, samples, model, bins):
+    """Function to plot the best fit MCMC values. Generates the
+        corner plot, the ON/OFF histograms with best fit
+        analytical models.
+
+    Args:
+        off (list): The OFF window intensities
+        on (list): The ON window intensities
+        n (int): number of components in the ON window
+        samples (numpy.ndarray): The flattened chains from mcmc run
+        model (str): Model used to describe ON histogram (gauss/exp tail)
+        bins (list): The bins onto which the histgram is evaluated on
+    """
+
+    fig = plt.figure()
+
+    if model == "gauss":
+        labels = []
+        for i in range(n):
+            labels.append([rf"$\mu_{i}$", rf"$\sigma_{i}$", rf"$c_{i}$"])
+        labels[0][2] = "NF"
+        labels = np.array(labels)
+        labels = labels.flatten("F")
+        # labels = np.concatenate((labels, ['NF']))
+        labels = labels[:-1]
+    elif model == "exp_tail":
+        labels = []
+        lam_labels = []
+        for i in range(n):
+            labels.append([rf"$\mu_{i}$", rf"$\sigma_{i}$"])
+            if i > 0:
+                lam_labels.append(rf"$\tau_{i}$")
+        labels = np.array(labels)
+        labels = labels.flatten("F")
+        labels = np.concatenate((labels, lam_labels, ["NF"]))
+    corner.corner(samples, labels=labels, label_kwargs={"fontsize": 15})
+    plt.show()
+
+    fit_values = np.median(samples, axis=0)
+
+    # Plot histograms
+    fig2 = plt.figure()
+    _ = plt.hist(off, 50, density=True, histtype="step", label="Off hist.")
+    _ = plt.hist(on, 75, density=True, histtype="step", label="On hist.")
+    x_plot = bins
+
+    # Plot fit components
+    off_fit = gauss(x_plot, fit_values[0], fit_values[n])
+    plt.plot(x_plot, off_fit, label="Off fit")
+
+    # Iterate for on-fit
+    mus = fit_values[1:n]
+    stds = fit_values[n + 1 : 2 * n]
+    if model == "gauss":
+        weights = fit_values[2 * n :]
+        weights = np.concatenate((weights, [1 - weights.sum()]))
+        plt.plot(x_plot, weights[0] * off_fit, label="Off fit*NF")
+
+        on_fit = off_fit * weights[0]
+        for i in range(len(mus)):
+            on_fit_comp = gauss(x_plot, mus[i], stds[i]) * weights[i + 1]
+            plt.plot(x_plot, on_fit_comp, label=f"On comp. {i+2}")
+            on_fit += on_fit_comp
+    elif model == "exp_tail":
+        lams = fit_values[2 * n : 3 * n - 1]
+        weights = fit_values[3 * n - 1 :]
+        weights = np.concatenate((weights, [1 - weights.sum()]))
+        plt.plot(x_plot, weights[0] * off_fit, label="Off fit*NF")
+
+        on_fit_off = off_fit * weights[0]
+        on_fit = np.zeros_like(x_plot)
+        for i in range(len(mus)):
+            on_fit_comp = (
+                exp_mod_gauss(x_plot, mus[i], stds[i], lams[i]) * weights[i + 1]
+            )
+            on_fit += on_fit_comp
+        plt.plot(x_plot, on_fit, label=f"On comp {i+2}")
+        on_fit += on_fit_off
+
+    plt.plot(x_plot, on_fit, label="On fit")
+    plt.xlabel("Raw Intensity", fontsize=15)
+    plt.ylabel("Probability Density", fontsize=15)
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
+
 class nulls:
     """
     The main class object that does the fitting for the ON/OFF histograms
@@ -152,7 +239,6 @@ class nulls:
     def __init__(
         self, on, off, ncomp=2, model="gauss", nwalkers=32, burnin=200, nsteps=5000
     ):
-
         # Get rid of zapped single pulses
         mask = ~np.isnan(on) & ~np.isnan(off)
         on = on[mask]
@@ -641,82 +727,6 @@ class nulls:
 
         Generates the corner plot, the ON/OFF histograms with best fit analytical models.
         """
-        fig = plt.figure()
-
-        off = self.off
-        on = self.on
-        n = self.n
-        samples = self.samples
-        model = self.model
-
-        if self.model == "gauss":
-            labels = []
-            for i in range(self.n):
-                labels.append([rf"$\mu_{i}$", rf"$\sigma_{i}$", rf"$c_{i}$"])
-            labels[0][2] = "NF"
-            labels = np.array(labels)
-            labels = labels.flatten("F")
-            # labels = np.concatenate((labels, ['NF']))
-            labels = labels[:-1]
-        elif self.model == "exp_tail":
-            labels = []
-            lam_labels = []
-            for i in range(self.n):
-                labels.append([rf"$\mu_{i}$", rf"$\sigma_{i}$"])
-                if i > 0:
-                    lam_labels.append(rf"$\tau_{i}$")
-            labels = np.array(labels)
-            labels = labels.flatten("F")
-            labels = np.concatenate((labels, lam_labels, ["NF"]))
-        corner.corner(samples, labels=labels, label_kwargs={"fontsize": 15})
-        plt.show()
-
-        fit_values = np.median(samples, axis=0)
-
-        # Plot histograms
-        fig2 = plt.figure()
-        _ = plt.hist(off, 50, density=True, histtype="step", label="Off hist.")
-        _ = plt.hist(on, 75, density=True, histtype="step", label="On hist.")
-        x_plot = self.bins
-
-        # Plot fit components
-        off_fit = gauss(x_plot, fit_values[0], fit_values[n])
-        plt.plot(x_plot, off_fit, label="Off fit")
-
-        # Iterate for on-fit
-        mus = fit_values[1:n]
-        stds = fit_values[n + 1 : 2 * n]
-        if model == "gauss":
-            weights = fit_values[2 * n :]
-            weights = np.concatenate((weights, [1 - weights.sum()]))
-            plt.plot(x_plot, weights[0] * off_fit, label="Off fit*NF")
-
-            on_fit = off_fit * weights[0]
-            for i in range(len(mus)):
-                on_fit_comp = gauss(x_plot, mus[i], stds[i]) * weights[i + 1]
-                plt.plot(
-                    x_plot, on_fit_comp * (1 - fit_values[-1]), label=f"On comp. {i+2}"
-                )
-                on_fit += on_fit_comp
-        elif model == "exp_tail":
-            lams = fit_values[2 * n : 3 * n - 1]
-            weights = fit_values[3 * n - 1 :]
-            weights = np.concatenate((weights, [1 - weights.sum()]))
-            plt.plot(x_plot, weights[0] * off_fit, label="Off fit*NF")
-
-            on_fit_off = off_fit * weights[0]
-            on_fit = np.zeros_like(x_plot)
-            for i in range(len(mus)):
-                on_fit_comp = (
-                    exp_mod_gauss(x_plot, mus[i], stds[i], lams[i]) * weights[i + 1]
-                )
-                on_fit += on_fit_comp
-            plt.plot(x_plot, on_fit, label=f"On comp {i+2}")
-            on_fit += on_fit_off
-
-        plt.plot(x_plot, on_fit, label="On fit")
-        plt.xlabel("Raw Intensity", fontsize=15)
-        plt.ylabel("Probability Density", fontsize=15)
-        plt.legend()
-        plt.tight_layout()
-        plt.show()
+        plot_corner_and_hist(
+            self.off, self.on, self.n, self.samples, self.model, self.bins
+        )
